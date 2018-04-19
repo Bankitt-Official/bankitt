@@ -1,30 +1,53 @@
-Bankitt Core staging tree 0.12.1
+BanKitt Community (BKT) Take Over
 ===============================
 
 What is Bankitt?
 ----------------
 
-Bankitt is an experimental new digital currency that enables anonymous, instant
-payments to anyone, anywhere in the world. Bankitt uses peer-to-peer technology
-to operate with no central authority: managing transactions and issuing money
-are carried out collectively by the network. Bankitt Core is the name of the open
-source software which enables the use of this currency.
+BanKITT is a form of digital currency secured by cryptography and issued through a decentralized and advanced mining market.
+BanKITT is using neoscrypt, an ASIC resistant mining algorithm.Masternodes are in place to help secure and maintain the network, receiving a share of the block rewards.
+
+After original developer left the BanKitt project and let it slowly die out, community has stepped up and made the hard work necessary for the project to live on.
 
 For more information, as well as an immediately useable, binary version of
-the Bankitt Core software, see https://www.bankitt.org/get-bankitt/.
+the Bankitt Core software, see https://github.com/modcrypto/bankitt/releases.
 
+Links
+------
+
+Webpage :  https://www.bankitt.network/ in developement
+Blockexplorer: https://explorer.bankitt.network/
+Twitter:  https://twitter.com/BankittC
+Discord: https://discord.gg/edksx9y
+Telegram : https://t.me/joinchat/HBeVnBB6pqUCyWUuupefOQ
+Wallet:  https://github.com/modcrypto/bankitt/releases 
+
+Info
+-------
+- Name: BanKITT
+- Ticker: BKT 
+- Premine: 0
+- Mining algorithm: NeoScrypt (considering change to XEVEN soon)
+- Block time: 60 sec (considering change to 240 sec)
+- Block reward: 120 BKT (considering change to 60 BKT) 
+- Maximum supply : 30.000.000 (considering to change)
+- Block reward distribution : 25% POW / 75% MN (considering change to  35 POW / 15 MN / 10 DF)
+- Masternode colateral: 10000 BKT 
+- Difficulty retargeting: Dark Gravity Wave 3
+- p2p port: 1661 
+- RPC port: 6116
 
 License
 -------
 
-Bankitt Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
+Bankitt Community is released under the terms of the MIT license. See [COPYING](COPYING) for more
 information or see https://opensource.org/licenses/MIT.
 
 Development Process
 -------------------
 
 The `master` branch is meant to be stable. Development is normally done in separate branches.
-[Tags](https://github.com/bankittpay/bankitt/tags) are created to indicate new official,
+[Tags](https://github.com/modcrypto/bankitt/tags) are created to indicate new official,
 stable release versions of Bankitt Core.
 
 The contribution workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -58,19 +81,3 @@ to add a test plan to the pull request description if testing the changes is
 not straightforward.
 
 
-Info
--------
-Name: Bankitt
-Tiker: BKT
-Algo: neoscrypt
-BlockTime: 1 min
-Block Reward: 2 BKT
-Masternode Reward: 50%
-
-Block:
-1: 3000000 BKT
-2 - 114: 0 BKT
-115 - ...: 2 BKT
-
-RPC port = 6116
-p2p = 1661;

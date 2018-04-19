@@ -131,7 +131,7 @@ public:
         pchMessageStart[3] = 0x6f;
         vAlertPubKey = ParseHex("04738eb90c59f38ac4651cadba151947a9ba33369bc15e914a69e96cc01176240c28ff76964924d9fd70b3ca14bc648c9b273c79640a88733b4e3736c9213ce50b");
         nDefaultPort = 1661;
-        nMaxTipAge = 6 * 60 * 60; // ~144 blocks behind -> 2 x fork detection time, was 24 * 60 * 60 in bitcoin
+        nMaxTipAge = 1.5 * 60 * 60; // ~144 blocks behind -> 2 x fork detection time, was 24 * 60 * 60 in bitcoin
         nDelayGetHeadersTime = 24 * 60 * 60;
         nPruneAfterHeight = 100000;
 
@@ -142,8 +142,9 @@ public:
 
         //vFixedSeeds.clear();
         //vSeeds.clear();
-        vSeeds.push_back(CDNSSeedData("bankitt.xyz", "dnsseed.bankitt.xyz"));
-
+        vSeeds.push_back(CDNSSeedData("dnsseed.bankitt.network", "seed01.bankitt.network"));
+        vSeeds.push_back(CDNSSeedData("dnsseed.bankitt.network", "seed02.bankitt.network"));
+        vSeeds.push_back(CDNSSeedData("dnsseed.bankitt.network", "seed03.bankitt.network"));
 
         // Bankitt addresses start with 'S'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,26);

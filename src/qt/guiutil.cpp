@@ -903,11 +903,12 @@ QString getThemeName()
 {
     QSettings settings;
     QString theme = settings.value("theme", "").toString();
-
+     
     if(!theme.isEmpty()){
-        return theme;
+        if(QString::compare(theme,"lightblue")==0) return QString("lightblue"); 
+        if(QString::compare(theme,"trad")==0) return QString("trad"); 
     }
-    return QString("light");  
+    return QString("lightblue");  
 }
 
 // Open CSS when configured
@@ -916,14 +917,14 @@ QString loadStyleSheet()
     QString styleSheet;
     QSettings settings;
     QString cssName;
-    QString theme = settings.value("theme", "").toString();
+    QString theme = getThemeName();
 
-    if(!theme.isEmpty()){
+    if(!theme.isEmpty()){       
         cssName = QString(":/css/") + theme; 
     }
     else {
-        cssName = QString(":/css/light");  
-        settings.setValue("theme", "light");
+        cssName = QString(":/css/lightblue");  
+        settings.setValue("theme", "lightblue");
     }
     
     QFile qFile(cssName);      

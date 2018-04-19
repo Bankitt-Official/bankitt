@@ -32,7 +32,13 @@
    <item>
     <widget class="QWidget" name="bgWidget" native="true">
      <property name="styleSheet">
-      <string notr="true"/>
+      <string notr="true">#contentWidget{
+  background-color: rgba(200,200,200,200);
+}
+
+.QLabel {
+   background-color: transparent;
+}</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayoutMain" stretch="0">
       <property name="leftMargin">
@@ -49,6 +55,9 @@
       </property>
       <item>
        <widget class="QWidget" name="contentWidget" native="true">
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
         <property name="styleSheet">
          <string notr="true"/>
         </property>

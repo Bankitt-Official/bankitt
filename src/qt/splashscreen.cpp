@@ -34,15 +34,15 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) 
     setWindowFlags(Qt::FramelessWindowHint);
 
     // set reference point, paddings
-    int paddingLeft             = 14;
-    int paddingTop              = 470;
+    int paddingLeft             = 50;
+    int paddingTop              = 425;
     int titleVersionVSpace      = 17;
     int titleCopyrightVSpace    = 32;
 
     float fontFactor            = 1.0;
 
     // define text to place
-    QString titleText       = tr("Bankitt Core");
+    QString titleText       = tr("Bankitt Core Community");
     QString versionText     = QString(tr("Version %1")).arg(QString::fromStdString(FormatFullVersion()));
     QString copyrightTextBtc   = QChar(0xA9)+QString(" 2009-%1 ").arg(COPYRIGHT_YEAR) + QString(tr("The Bitcoin Core developers"));
     QString copyrightTextBankitt   = QChar(0xA9)+QString(" 2014-%1 ").arg(COPYRIGHT_YEAR) + QString(tr("The Bankitt Core developers"));
@@ -60,7 +60,7 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) 
     pixmap = QPixmap(splashScreenPath);
 
     QPainter pixPaint(&pixmap);
-    pixPaint.setPen(QColor(100,100,100));
+    pixPaint.setPen(QColor(0,50,60));
 
     // check font size and drawing with
     pixPaint.setFont(QFont(font, 28*fontFactor));
@@ -176,7 +176,7 @@ void SplashScreen::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     painter.drawPixmap(0, 0, pixmap);
-    QRect r = rect().adjusted(5, 5, -5, -5);
+    QRect r = rect().adjusted(15, 15, -15, -20);
     painter.setPen(curColor);
     painter.drawText(r, curAlignment, curMessage);
 }

@@ -15,9 +15,9 @@
 
 //! These need to be macros, as clientversion.cpp's and bankitt*-res.rc's voodoo requires it
 #define CLIENT_VERSION_MAJOR 1
-#define CLIENT_VERSION_MINOR 1
+#define CLIENT_VERSION_MINOR 2
 #define CLIENT_VERSION_REVISION 0
-#define CLIENT_VERSION_BUILD 1
+#define CLIENT_VERSION_BUILD 2
 
 //! Set to true for release, false for prerelease or test build
 #define CLIENT_VERSION_IS_RELEASE true
@@ -38,7 +38,7 @@
 #define DO_STRINGIZE(X) #X
 
 //! Copyright string used in Windows .rc files
-#define COPYRIGHT_STR "2009-" STRINGIZE(COPYRIGHT_YEAR) " The Bitcoin Core Developers, 2014-" STRINGIZE(COPYRIGHT_YEAR) " The Bankitt Core Developers"
+#define COPYRIGHT_STR "2009-" STRINGIZE(COPYRIGHT_YEAR) " The Bitcoin Core Developers, 2014-" STRINGIZE(COPYRIGHT_YEAR) " The Bankitt Community Developers"
 
 /**
  * bankittd-res.rc includes this file, but it cannot cope with real c++ code.

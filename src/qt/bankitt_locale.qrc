@@ -14,6 +14,7 @@
         <file alias="sk">locale/bankitt_sk.qm</file>
         <file alias="sv">locale/bankitt_sv.qm</file>
         <file alias="vi">locale/bankitt_vi.qm</file>
+        <file alias="th">locale/bankitt_th_TH.qm</file>        
         <file alias="zh_CN">locale/bankitt_zh_CN.qm</file>
         <file alias="zh_TW">locale/bankitt_zh_TW.qm</file>
     </qresource>
