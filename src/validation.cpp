@@ -1307,11 +1307,7 @@ CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params&
     for (int i = consensusParams.nSubsidyHalvingInterval; i <= nPrevHeight; i += consensusParams.nSubsidyHalvingInterval) {
         nSubsidy -= nSubsidy/4;
     }
-
-    // Hard fork to reduce the block reward by 10 extra percent (allowing budget/superblocks)
-   // CAmount nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy/10 : 0;
-    
-    
+       
     return fSuperblockPartOnly ? 0 : nSubsidy;
 }
 
@@ -1320,7 +1316,8 @@ CAmount GetMasternodePayment(int nHeight, CAmount blockValue)
     CAmount ret = blockValue; // start at 50%
     // new policy 35 POW / 15 MN / 10 DF  start at 150000
     if (nHeight > SOFT_FORK1_START){
-        ret = 25;   //15MN + 10DF
+        ret = (ret*25/60);                 // 15MN + 10DF = 25
+        if(ret>25*COIN) ret = 25*COIN;     // not over 25
     }else if (nHeight > 30000){
         ret = ret/100*75;
     }else{

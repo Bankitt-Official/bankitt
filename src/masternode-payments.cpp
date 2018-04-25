@@ -286,10 +286,10 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
     // split reward between miner ...
     txNew.vout[0].nValue -= masternodePayment;
     // ... and masternode
-    // new policy 35 POW / 15 MN / 10 DF start at 150000
+    // new reward policy 35 POW / 15 MN / 10 DF start at 150000
     if(nBlockHeight>SOFT_FORK1_START){
         // Pay to Devloper Fund address 10 coin
-        CAmount developerPayment = 10*COIN;
+        CAmount developerPayment = masternodePayment*10/25;
         masternodePayment -= developerPayment;
         CBitcoinAddress devaddress[2];
         devaddress[0].SetString("BatD7NopcootczqXNzoW9i7psfjSESocXR"); // DEV1 Fix address 
