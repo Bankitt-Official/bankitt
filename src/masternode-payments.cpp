@@ -217,7 +217,6 @@ void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blo
             CSuperblockManager::CreateSuperblock(txNew, nBlockHeight, voutSuperblockRet);
             return;
     }
-
     // FILL BLOCK PAYEE WITH MASTERNODE PAYMENT OTHERWISE
     mnpayments.FillBlockPayee(txNew, nBlockHeight, blockReward, txoutMasternodeRet);
     LogPrint("mnpayments", "FillBlockPayments -- nBlockHeight %d blockReward %lld txoutMasternodeRet %s txNew %s",
@@ -287,7 +286,21 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
     // split reward between miner ...
     txNew.vout[0].nValue -= masternodePayment;
     // ... and masternode
+    // new policy 35 POW / 15 MN / 10 DF start at 150000
+    if(nBlockHeight>SOFT_FORK1_START){
+        // Pay to Devloper Fund address 10 coin
+        CAmount developerPayment = 10*COIN;
+        masternodePayment -= developerPayment;
+        CBitcoinAddress devaddress[2];
+        devaddress[0].SetString("BatD7NopcootczqXNzoW9i7psfjSESocXR"); // DEV1 Fix address 
+        devaddress[1].SetString("BjE7tGa9Xko9zqLF9YP9knhaNaq2b3qLhz"); // DEV2 Fix address
+        unsigned int dev_index= nBlockHeight % 2;
+        CTxOut txoutDevRet = CTxOut(developerPayment, GetScriptForDestination(devaddress[dev_index].Get()));
+		LogPrintf("Developer Fund payment of value %u\n", 10);
+    }
+
     txoutMasternodeRet = CTxOut(masternodePayment, payee);
+
     txNew.vout.push_back(txoutMasternodeRet);
 
     CTxDestination address1;

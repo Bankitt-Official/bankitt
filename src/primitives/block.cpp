@@ -13,11 +13,15 @@
 
 uint256 CBlockHeader::GetHash() const
 {
-    //return HashX11(BEGIN(nVersion), END(nNonce));
-    uint256 thash;
-    unsigned int profile = 0x0;
-    neoscrypt((unsigned char *) &nVersion, (unsigned char *) &thash, profile);
-    return thash;
+    // change to XEVAN   05-15-2018 00:00:00
+    if(nTime >= 1526342400 ){  
+      return XEVAN(BEGIN(nVersion), END(nNonce));  
+    }else{
+      uint256 thash;
+      unsigned int profile = 0x0;
+      neoscrypt((unsigned char *) &nVersion, (unsigned char *) &thash, profile);
+      return thash;
+    }
 }
 
 std::string CBlock::ToString() const

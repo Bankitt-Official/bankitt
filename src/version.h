@@ -9,6 +9,10 @@
 /**
  * network protocol versioning
  */
+static const int SOFT_FORK1_START    = 150000;
+
+static const int SOFT_FORK1_VERSION  = 2;
+
 
 static const int PROTOCOL_VERSION = 90002; //
 

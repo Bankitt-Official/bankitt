@@ -318,18 +318,43 @@ crypto_libbitcoin_crypto_a_SOURCES = \
 
 # x11
 crypto_libbitcoin_crypto_a_SOURCES += \
+  crypto/common.h \
+  crypto/scrypt.cpp \
+  crypto/scrypt.h \
+  crypto/hmac_sha256.cpp \  
+  crypto/hmac_sha256.h \
+  crypto/hmac_sha512.cpp \
+  crypto/hmac_sha512.h \
+  crypto/rfc6979_hmac_sha256.cpp \
+  crypto/rfc6979_hmac_sha256.h \
+  crypto/ripemd160.cpp \
+  crypto/aes_helper.c \
   crypto/blake.c \
   crypto/bmw.c \
   crypto/cubehash.c \
   crypto/echo.c \
   crypto/groestl.c \
+  crypto/fugue.c \
+  crypto/hamsi.c \
   crypto/jh.c \
   crypto/keccak.c \
   crypto/luffa.c \
   crypto/shavite.c \
   crypto/simd.c \
   crypto/skein.c \
-	crypto/neoscrypt.c \
+  crypto/shabal.c \
+  crypto/whirlpool.c \
+  crypto/haval.c \
+  crypto/sha2.c \
+  crypto/sph_sha2big.c \
+  crypto/ripemd160.h \
+  crypto/sha1.cpp \
+  crypto/sha1.h \
+  crypto/sha256.cpp \
+  crypto/sha256.h \
+  crypto/sha512.h \
+  crypto/neoscrypt.c \
+  crypto/neoscrypt.h \
   crypto/sph_blake.h \
   crypto/sph_bmw.h \
   crypto/sph_cubehash.h \
@@ -341,8 +366,15 @@ crypto_libbitcoin_crypto_a_SOURCES += \
   crypto/sph_shavite.h \
   crypto/sph_simd.h \
   crypto/sph_skein.h \
-	crypto/neoscrypt.h \
-  crypto/sph_types.h
+  crypto/sph_hamsi.h \
+  crypto/sph_fugue.h \
+  crypto/sph_shabal.h \
+  crypto/sph_whirlpool.h \
+  crypto/sph_sha2.h \
+  crypto/sph_haval.h \
+  crypto/sph_types.h \
+  crypto/sha512.cpp \
+  crypto/sha512.h
 
 # common: shared between bankittd, and bankitt-qt and non-server tools
 libbitcoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
