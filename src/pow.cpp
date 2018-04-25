@@ -14,6 +14,9 @@
 
 #include <math.h>
 
+
+int64_t newPowTargetSpacing = 60;
+
 unsigned int static KimotoGravityWell(const CBlockIndex* pindexLast, const Consensus::Params& params) {
     const CBlockIndex *BlockLastSolved = pindexLast;
     const CBlockIndex *BlockReading = pindexLast;
@@ -26,7 +29,7 @@ unsigned int static KimotoGravityWell(const CBlockIndex* pindexLast, const Conse
     double EventHorizonDeviation;
     double EventHorizonDeviationFast;
     double EventHorizonDeviationSlow;
-
+     
     uint64_t pastSecondsMin = params.nPowTargetTimespan * 0.025;
     uint64_t pastSecondsMax = params.nPowTargetTimespan * 7;
     uint64_t PastBlocksMin = pastSecondsMin / params.nPowTargetSpacing;
@@ -112,7 +115,7 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const Consens
 
     int64_t nActualTimespan = pindexLast->GetBlockTime() - pindex->GetBlockTime();
     // NOTE: is this accurate? nActualTimespan counts it for (nPastBlocks - 1) blocks only...
-    int64_t nTargetTimespan = nPastBlocks * params.nPowTargetSpacing;
+    int64_t nTargetTimespan = nPastBlocks * newPowTargetSpacing ; // params.nPowTargetSpacing;
 
     if (nActualTimespan < nTargetTimespan/3)
         nActualTimespan = nTargetTimespan/3;
@@ -172,7 +175,14 @@ unsigned int GetNextWorkRequiredBTC(const CBlockIndex* pindexLast, const CBlockH
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     unsigned int retarget = DIFF_DGW;
-
+    
+    newPowTargetSpacing = params.nPowTargetSpacing;
+    
+    if(pindexLast->nHeight > SOFT_FORK1_START ){
+        // change block time to 240 second
+        newPowTargetSpacing = 4 * 60;
+    }
+        
     // mainnet/regtest share a configuration
     if (Params().NetworkIDString() == CBaseChainParams::MAIN || Params().NetworkIDString() == CBaseChainParams::REGTEST) {
         //if (pindexLast->nHeight + 1 >= -1) retarget = DIFF_DGW;
@@ -272,6 +282,12 @@ arith_uint256 GetBlockProof(const CBlockIndex& block)
 
 int64_t GetBlockProofEquivalentTime(const CBlockIndex& to, const CBlockIndex& from, const CBlockIndex& tip, const Consensus::Params& params)
 {
+    newPowTargetSpacing = params.nPowTargetSpacing;
+    if(tip.nHeight > SOFT_FORK1_START ){
+        // change block time to 240 second
+        newPowTargetSpacing = 4 * 60;
+    }
+
     arith_uint256 r;
     int sign = 1;
     if (to.nChainWork > from.nChainWork) {
@@ -280,7 +296,7 @@ int64_t GetBlockProofEquivalentTime(const CBlockIndex& to, const CBlockIndex& fr
         r = from.nChainWork - to.nChainWork;
         sign = -1;
     }
-    r = r * arith_uint256(params.nPowTargetSpacing) / GetBlockProof(tip);
+    r = r * arith_uint256(newPowTargetSpacing) / GetBlockProof(tip);
     if (r.bits() > 63) {
         return sign * std::numeric_limits<int64_t>::max();
     }

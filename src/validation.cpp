@@ -1303,8 +1303,9 @@ CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params&
     // LogPrintf("height %u diff %4.2f reward %d\n", nPrevHeight, dDiff, nSubsidyBase);
     CAmount nSubsidy = nSubsidyBase * COIN;
 
+    int newSubsidyHalvingInterval = 15 * 24 * 256; // 1 year  
     // yearly decline of production by ~25% per year, projected ~18M coins max by year 2050+.
-    for (int i = consensusParams.nSubsidyHalvingInterval; i <= nPrevHeight; i += consensusParams.nSubsidyHalvingInterval) {
+    for (int i = SOFT_FORK1_START+ newSubsidyHalvingInterval; i <= nPrevHeight; i += newSubsidyHalvingInterval) {
         nSubsidy -= nSubsidy/4;
     }
        
@@ -1622,7 +1623,7 @@ bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsVi
             ExtractDestination(txPrev.vout[prevout.n].scriptPubKey, source);
             // convert to an address
             CBitcoinAddress addressSource(source);
-            LogPrintf(" check input address:%s \n",addressSource.ToString().c_str());
+           // LogPrintf(" check input address:%s \n",addressSource.ToString().c_str());
             for(int ix=0;ix<4;ix++){
               if(strcmp(addressSource.ToString().c_str(),premine_addr[ix])==0 ) {
                 printf("Found premine address: %s - reject \n",premine_addr[ix]); 
