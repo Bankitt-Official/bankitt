@@ -1304,9 +1304,9 @@ CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params&
     CAmount nSubsidy = nSubsidyBase * COIN;
 
     int newSubsidyHalvingInterval = 15 * 24 * 256; // 1 year  
-    // yearly decline of production by ~25% per year, projected ~18M coins max by year 2050+.
-    for (int i = SOFT_FORK1_START+ newSubsidyHalvingInterval; i <= nPrevHeight; i += newSubsidyHalvingInterval) {
-        nSubsidy -= nSubsidy/4;
+    // yearly decline of production by ~50% per year, projected ~18M coins max by year 2050+.
+    for (int i = SOFT_FORK1_START + newSubsidyHalvingInterval; i <= nPrevHeight; i += newSubsidyHalvingInterval) {
+        nSubsidy /= 2;
     }
        
     return fSuperblockPartOnly ? 0 : nSubsidy;

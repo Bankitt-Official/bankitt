@@ -16,7 +16,7 @@ static const int SOFT_FORK1_MIN_PROTOCOL_VERSION = 90003; //
 /**
  * network protocol versioning
  */
-static const int PROTOCOL_VERSION = 90003; //
+static int PROTOCOL_VERSION = 90002; //
 
 //! initial proto version, to be increased after version/verack negotiation
 static const int INIT_PROTO_VERSION = 209;

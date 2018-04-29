@@ -4,6 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "primitives/block.h"
+#include "version.h"
 
 #include "hash.h"
 #include "tinyformat.h"
@@ -12,26 +13,14 @@
 #include "crypto/neoscrypt.h"
 #include "crypto/lyra2z/lyra2z.h"
 
-/*
-uint256 CBlockHeader::GetHash() const
-{
-    // change to XEVAN   05-15-2018 00:00:00
-    if(nTime >= 1526342400 ){  
-      return XEVAN(BEGIN(nVersion), END(nNonce));  
-    }else{
-      uint256 thash;
-      unsigned int profile = 0x0;
-      neoscrypt((unsigned char *) &nVersion, (unsigned char *) &thash, profile);
-      return thash;
-    }
-}
-*/
-
 uint256 CBlockHeader::GetHash() const
 {      
     uint256 thash;
     unsigned int profile = 0x0;
     // change to lyra2z   05-15-2018 00:00:00
+    if(nTime >= 1526342400 - (24*60*60*3)){ 
+      PROTOCOL_VERSION = SOFT_FORK1_PROTOCOL_VERSION;
+    }
     if(nTime >= 1526342400 ){  
       lyra2z_hash(BEGIN(nVersion), BEGIN(thash));
     }else{
