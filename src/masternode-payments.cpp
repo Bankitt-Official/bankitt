@@ -282,12 +282,12 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
 
     // GET MASTERNODE PAYMENT VARIABLES SETUP
     CAmount masternodePayment = GetMasternodePayment(nBlockHeight, blockReward);
-
+    
     // split reward between miner ...
     txNew.vout[0].nValue -= masternodePayment;
     // ... and masternode
     // new reward policy 35 POW / 15 MN / 10 DF start at 150000
-    if(nBlockHeight>SOFT_FORK1_START){
+    if(nBlockHeight>SOFT_FORK1_START && masternodePayment>0){
         // Pay to Devloper Fund address 10 coin
         CAmount developerPayment = masternodePayment*10/25;
         masternodePayment -= developerPayment;
@@ -299,15 +299,14 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
 		LogPrintf("Developer Fund payment of value %u\n", 10);
     }
 
-    txoutMasternodeRet = CTxOut(masternodePayment, payee);
-
-    txNew.vout.push_back(txoutMasternodeRet);
-
-    CTxDestination address1;
-    ExtractDestination(payee, address1);
-    CBitcoinAddress address2(address1);
-
-    LogPrintf("CMasternodePayments::FillBlockPayee -- Masternode payment %lld to %s\n", masternodePayment, address2.ToString());
+    if(masternodePayment>0){
+      txoutMasternodeRet = CTxOut(masternodePayment, payee);
+      txNew.vout.push_back(txoutMasternodeRet);
+      CTxDestination address1;
+      ExtractDestination(payee, address1);
+      CBitcoinAddress address2(address1);
+      LogPrintf("CMasternodePayments::FillBlockPayee -- Masternode payment %lld to %s\n", masternodePayment, address2.ToString());
+    }
 }
 
 int CMasternodePayments::GetMinMasternodePaymentsProto() {

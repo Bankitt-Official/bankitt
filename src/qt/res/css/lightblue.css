@@ -114,16 +114,19 @@ padding-bottom:5px;
 }
 
 QPushButton:hover {
-background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #64ACD2, stop: .1 #46AADE, stop: .95 #46AADE, stop: 1 #1D80B5);
+  background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: .01 #64ACD2, stop: .1 #46BBEE, stop: .95 #46AADE, stop: 1 #1D80B5);
+  color: #ffff00;
 }
 
 QPushButton:focus {
-border:none;
-outline:none;
+  border:none;
+  outline:none;
 }
 
 QPushButton:pressed {
-border:1px solid #333;
+  border:1px solid #333;
+  background-color:rgb(28, 162, 219);
+  color: #000;
 }
 
 QComboBox { /* Dropdown Menus */

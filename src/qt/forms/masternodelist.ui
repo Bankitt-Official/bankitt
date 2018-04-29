@@ -47,7 +47,7 @@
      <item>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tabMyMasternodes">
         <attribute name="title">
@@ -312,7 +312,7 @@
         </attribute>
         <layout class="QGridLayout" name="gridLayout_4">
          <item row="1" column="0">
-          <widget class="QTextEdit" name="textEdit_2">
+          <widget class="QTextEdit" name="textEditMaster">
            <property name="maximumSize">
             <size>
              <width>16777215</width>
@@ -325,10 +325,17 @@
           </widget>
          </item>
          <item row="3" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout">
+          <layout class="QHBoxLayout" name="HLayout">
            <property name="topMargin">
             <number>2</number>
            </property>
+           <item>
+            <widget class="QPushButton" name="pushButtonLoad">
+             <property name="text">
+              <string>Load All Files</string>
+             </property>
+            </widget>
+           </item>
            <item>
             <widget class="QPushButton" name="pushButtonSaveAll">
              <property name="text">
@@ -349,6 +356,19 @@
               <string>Save masternode.conf</string>
              </property>
             </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </item>
@@ -373,7 +393,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton">
+              <widget class="QPushButton" name="pushButtonAddMaster">
                <property name="text">
                 <string>add masternode</string>
                </property>
@@ -389,7 +409,7 @@
             </layout>
            </item>
            <item>
-            <widget class="QTextEdit" name="textEdit">
+            <widget class="QTextEdit" name="textEditConfig">
              <property name="minimumSize">
               <size>
                <width>0</width>

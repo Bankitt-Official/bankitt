@@ -38,7 +38,6 @@ public:
     void setWalletModel(WalletModel *walletModel);
     void StartAlias(std::string strAlias);
     void StartAll(std::string strCommand = "start-all");
-
 private:
     QMenu *contextMenu;
     int64_t nTimeFilterUpdated;
@@ -73,5 +72,13 @@ private Q_SLOTS:
     void on_startMissingButton_clicked();
     void on_tableWidgetMyMasternodes_itemSelectionChanged();
     void on_UpdateButton_clicked();
+    void on_ButtonSaveAll_clicked();
+    void on_ButtonSaveConfig_clicked();
+    void on_ButtonSaveMaster_clicked();
+    void on_ButtonAddMaster_clicked();
+    void on_ButtonDocument_clicked();
+    void on_DocumentConfig_changed();    
+    void on_DocumentMaster_changed(); 
+    void loadMasterConfigFile(); 
 };
 #endif // MASTERNODELIST_H

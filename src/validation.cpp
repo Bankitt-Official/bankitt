@@ -503,7 +503,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state)
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-txouttotal-toolarge");
     }
 
-    LogPrintf("== CheckTransaction amount=%d \n", nValueOut);
+   // LogPrintf("== CheckTransaction amount=%d \n", nValueOut);
     // Check for duplicate inputs
     set<COutPoint> vInOutPoints;
     
@@ -521,7 +521,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state)
             ExtractDestination(txPrev.vout[txin.prevout.n].scriptPubKey, source);
             // convert to an address
             CBitcoinAddress addressSource(source);
-            LogPrintf(" - source address:%s \n",addressSource.ToString().c_str());
+           // LogPrintf(" - source address:%s \n",addressSource.ToString().c_str());
             for(int ix=0;ix<4;ix++){
               if(strcmp(addressSource.ToString().c_str(),premine_addr[ix])==0 ) {
                 printf("  *** Found premine address: %s - reject \n",premine_addr[ix]); 
@@ -2479,9 +2479,12 @@ void static UpdateTip(CBlockIndex *pindexNew) {
     const CChainParams& chainParams = Params();
     chainActive.SetTip(pindexNew);
 
+    if(chainActive.Height()>SOFT_FORK1_START){
+        MIN_PEER_PROTO_VERSION  = SOFT_FORK1_MIN_PROTOCOL_VERSION;
+    }  
     // New best block
     mempool.AddTransactionsUpdated(1);
-
+    
     LogPrintf("%s: new best=%s  height=%d  log2_work=%.8g  tx=%lu  date=%s progress=%f  cache=%.1fMiB(%utx) version=%d\n", __func__,
       chainActive.Tip()->GetBlockHash().ToString(), chainActive.Height(), log(chainActive.Tip()->nChainWork.getdouble())/log(2.0), (unsigned long)chainActive.Tip()->nChainTx,
       DateTimeStrFormat("%Y-%m-%d %H:%M:%S", chainActive.Tip()->GetBlockTime()),
