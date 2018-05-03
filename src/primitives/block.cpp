@@ -17,18 +17,16 @@ uint256 CBlockHeader::GetHash() const
 {      
     uint256 thash;
     unsigned int profile = 0x0;
-    // change to lyra2z   05-15-2018 00:00:00
-    if(nTime >= 1526342400 - (24*60*60*3)){ 
+    if(nTime >= SOFT_FORK1_ALGOCHANGE_TIME - (24*60*60*3)){ 
       PROTOCOL_VERSION = SOFT_FORK1_PROTOCOL_VERSION;
     }
-    if(nTime >= 1526342400 ){  
+    if(nTime >= SOFT_FORK1_ALGOCHANGE_TIME){  
       lyra2z_hash(BEGIN(nVersion), BEGIN(thash));
     }else{
       neoscrypt((unsigned char *) &nVersion, (unsigned char *) &thash, profile);
     }
     return thash;
 }
-
 
 std::string CBlock::ToString() const
 {

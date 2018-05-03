@@ -129,9 +129,10 @@ public:
         pchMessageStart[1] = 0x61;
         pchMessageStart[2] = 0x72;
         pchMessageStart[3] = 0x6f;
-        vAlertPubKey = ParseHex("04738eb90c59f38ac4651cadba151947a9ba33369bc15e914a69e96cc01176240c28ff76964924d9fd70b3ca14bc648c9b273c79640a88733b4e3736c9213ce50b");
+        //vAlertPubKey = ParseHex("04738eb90c59f38ac4651cadba151947a9ba33369bc15e914a69e96cc01176240c28ff76964924d9fd70b3ca14bc648c9b273c79640a88733b4e3736c9213ce50b");
+        vAlertPubKey = ParseHex("04a88ea95c9148d71d87f995fa3593ce7e15de1db7cf78efbd01ed2d2cdc3a962fea05b030b4e6ffbfa981236d06efb4bf22eaa5baf68260e70c4446f2c22e0627";
         nDefaultPort = 1661;
-        nMaxTipAge = 1.5 * 60 * 60; // ~144 blocks behind -> 2 x fork detection time, was 24 * 60 * 60 in bitcoin
+        nMaxTipAge = 6 * 60 * 60; // ~144 blocks behind -> 2 x fork detection time, was 24 * 60 * 60 in bitcoin
         nDelayGetHeadersTime = 24 * 60 * 60;
         nPruneAfterHeight = 100000;
 
@@ -140,12 +141,10 @@ public:
         assert(consensus.hashGenesisBlock == uint256S("0x00000fdb70656c3dc4387f3392a63e70758b43fd08a777108d340a858bec8e78"));
         assert(genesis.hashMerkleRoot == uint256S("0x67cc6063569bea507e4ed5b8eb4f33464234f4acd44b4e16f80088854139923c"));
 
-        //vFixedSeeds.clear();
-        //vSeeds.clear();
         vSeeds.push_back(CDNSSeedData("dnsseed.bankitt.network", "seed01.bankitt.network"));
         vSeeds.push_back(CDNSSeedData("dnsseed.bankitt.network", "seed02.bankitt.network"));
         vSeeds.push_back(CDNSSeedData("dnsseed.bankitt.network", "seed03.bankitt.network"));
-
+ 
         // Bankitt addresses start with 'S'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,26);
         // Bankitt script addresses start with '7'
@@ -162,6 +161,10 @@ public:
 
         vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
 
+        // for test
+        // vFixedSeeds.clear();
+        // vSeeds.clear();
+
         fMiningRequiresPeers = true;
         fDefaultConsistencyChecks = false;
         fRequireStandard = true;
@@ -170,8 +173,8 @@ public:
 
         nPoolMaxTransactions = 3;
         nFulfilledRequestExpireTime = 1 * 60 * 60; // fulfilled requests expire in 1 hour
-        strSporkPubKey = "04e42f51b2d8dc135a083cc5a37a11c2bdef7b6baa1e05b595a4dd0f578a8ca53fe21bd1d16c2ac1cf03eca89bdb2294a7a8b1e4324f2714fc99df3a254bc113d4";
-
+        // strSporkPubKey = "04e42f51b2d8dc135a083cc5a37a11c2bdef7b6baa1e05b595a4dd0f578a8ca53fe21bd1d16c2ac1cf03eca89bdb2294a7a8b1e4324f2714fc99df3a254bc113d4";
+        strSporkPubKey = "047e3bf198531c8af0450ab20a91bf521fda24ae7ceadcfed7cf169f2b06867eafa374e7ed92d6a2fc7c4c6cffa2673b45867d245439c922bb697432560ca6d6fe";
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
             (    0, uint256S("0x00000fdb70656c3dc4387f3392a63e70758b43fd08a777108d340a858bec8e78"))

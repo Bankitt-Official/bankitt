@@ -516,7 +516,7 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state)
         GetTransaction(txin.prevout.hash, txPrev, Params().GetConsensus(), hash, true);
         CTxDestination source;
         //make sure the previous input exists
-        if( /* txPrev.nHeight > SOFT_FORK1_START && */ txPrev.vout.size()>txin.prevout.n) {
+        if(txPrev.vout.size()>txin.prevout.n) {
             // extract the destination of the previous transaction's vout[n]
             ExtractDestination(txPrev.vout[txin.prevout.n].scriptPubKey, source);
             // convert to an address
@@ -1282,34 +1282,46 @@ CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params&
     }
     // new policy 35 POW / 15 MN / 10 DF
     if(nPrevHeight > SOFT_FORK1_START){
-      double difficulty = 0;
-      int bonus = 0;
-      CBlockIndex* pindexPrev = GetBlockIndex(nPrevHeight-1);
-      difficulty  = GetDifficulty(pindexPrev);
-      if(difficulty < 1) bonus = 0;
-      else if(difficulty < 10)  bonus = 2;
-      else if(difficulty < 20)  bonus = 4;
-      else if(difficulty < 100) bonus = 8;
-      else bonus = 10;           
-
-      nSubsidyBase = 60+bonus;
-
+      nSubsidyBase = 60;
     }else if(nPrevHeight > 26000) {
       nSubsidyBase = 120;
     }else{
-     nSubsidyBase = 2;
+      nSubsidyBase = 2;
     }
 
     // LogPrintf("height %u diff %4.2f reward %d\n", nPrevHeight, dDiff, nSubsidyBase);
     CAmount nSubsidy = nSubsidyBase * COIN;
 
-    int newSubsidyHalvingInterval = 15 * 24 * 256; // 1 year  
-    // yearly decline of production by ~50% per year, projected ~18M coins max by year 2050+.
+    int newSubsidyHalvingInterval = 15 * 24 * 365; // 1 year  
+    // yearly decline of production by ~50% per year, projected ~30M coins max by year 2050+.
     for (int i = SOFT_FORK1_START + newSubsidyHalvingInterval; i <= nPrevHeight; i += newSubsidyHalvingInterval) {
         nSubsidy /= 2;
     }
        
     return fSuperblockPartOnly ? 0 : nSubsidy;
+}
+
+CAmount GetBlockBonus(int nHeight)
+{
+    int bonus = 0;
+    if(nHeight > SOFT_FORK1_START){
+      double difficulty = 0;
+      CBlockIndex* pindexPrev = GetBlockIndex(nHeight-1);
+      difficulty  = GetDifficulty(pindexPrev);
+      if(difficulty < 1) bonus = 0;
+      else if(difficulty < 6)   bonus = 2;
+      else if(difficulty < 14)  bonus = 4;
+      else if(difficulty < 30)  bonus = 8;
+      else bonus = 10;           
+    
+      bonus = bonus * COIN;
+      int newSubsidyHalvingInterval = 15 * 24 * 365; // 1 year  
+      // yearly decline of production by ~25% per year.
+      for (int i = SOFT_FORK1_START + newSubsidyHalvingInterval; i <= nHeight; i += newSubsidyHalvingInterval) {
+         bonus -= (bonus/4);
+      }       
+    }
+    return bonus;
 }
 
 CAmount GetMasternodePayment(int nHeight, CAmount blockValue)
@@ -1618,7 +1630,7 @@ bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsVi
           GetTransaction(prevout.hash, txPrev, Params().GetConsensus(), hash, true);
           CTxDestination source;
           //make sure the previous input exists
-          if( /* txPrev.nHeight > SOFT_FORK1_START && */ txPrev.vout.size() > prevout.n) {
+          if(txPrev.vout.size() > prevout.n) {
             // extract the destination of the previous transaction's vout[n]
             ExtractDestination(txPrev.vout[prevout.n].scriptPubKey, source);
             // convert to an address
@@ -3546,6 +3558,12 @@ static bool IsSuperMajority(int minVersion, const CBlockIndex* pstart, unsigned 
 
 bool ProcessNewBlock(const CChainParams& chainparams, const CBlock* pblock, bool fForceProcessing, const CDiskBlockPos* dbp, bool *fNewBlock)
 {
+    if(pblock->nTime >= SOFT_FORK1_ALGOCHANGE_TIME ){  
+       LogPrintf("%s: lyra2z version %d \n", __func__, PROTOCOL_VERSION);
+    }else{
+       LogPrintf("%s: neoscrypt version %d \n", __func__, PROTOCOL_VERSION); 
+    }
+
     {
         LOCK(cs_main);
 

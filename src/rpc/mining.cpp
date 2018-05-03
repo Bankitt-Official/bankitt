@@ -11,6 +11,7 @@
 #include "consensus/consensus.h"
 #include "consensus/params.h"
 #include "consensus/validation.h"
+#include "consensus/merkle.h"
 #include "core_io.h"
 #include "init.h"
 #include "validation.h"
@@ -936,4 +937,118 @@ UniValue estimatesmartpriority(const UniValue& params, bool fHelp)
     result.push_back(Pair("priority", priority));
     result.push_back(Pair("blocks", answerFound));
     return result;
+}
+
+UniValue getwork(const UniValue& params, bool fHelp)
+{
+    if (fHelp || params.size() > 1)
+        throw runtime_error(
+            "getwork [data]\n"
+            "If [data] is not specified, returns formatted hash data to work on:\n"
+            "  \"midstate\" : precomputed hash state after hashing the first half of the data (DEPRECATED)\n" // deprecated
+            "  \"data\" : block data\n"
+            "  \"hash1\" : formatted hash buffer for second hash (DEPRECATED)\n" // deprecated
+            "  \"target\" : little endian hash target\n"
+            "If [data] is specified, tries to solve the block and returns true if it was successful.");
+
+     if (Params().MiningRequiresPeers()) {
+          if ( IsInitialBlockDownload() || !masternodeSync.IsSynced())
+             throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Bankitt is not connected!");           
+     }
+
+   // if (chainActive.Height() >= Params().LastPOWBlock())
+   //     throw JSONRPCError(RPC_MISC_ERROR, "No more PoW blocks");
+
+    typedef map<uint256, pair<CBlock*, CScript> > mapNewBlock_t;
+    static mapNewBlock_t mapNewBlock;    // FIXME: thread safety
+    static vector<CBlock*> vNewBlock;
+    static boost::shared_ptr<CReserveScript> coinbaseScript;
+    
+    GetMainSignals().ScriptForMining(coinbaseScript);
+
+    if (!coinbaseScript || coinbaseScript->reserveScript.empty())
+        throw std::runtime_error("No coinbase script available (mining requires a wallet)");
+
+
+    if (params.size() == 0)
+    {
+        // Update block
+        static unsigned int nTransactionsUpdatedLast;
+        static CBlockIndex* pindexPrev;
+        static int64_t nStart;
+        static CBlock* pblock;
+ //
+            // Create new block
+            //
+        pindexPrev = chainActive.Tip();    
+        nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
+        std::unique_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(Params(), coinbaseScript->reserveScript));
+        if (!pblocktemplate.get())
+        {
+            throw runtime_error("getwork -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
+        }    
+        pblock = &pblocktemplate->block;            
+        static unsigned int nExtraNonce = 0;
+        IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
+        nStart = GetTime();
+         // Update nTime
+        pblock->nNonce = 0;
+
+         // Save
+        mapNewBlock[pblock->hashMerkleRoot] = make_pair(pblock, pblock->vtx[0].vin[0].scriptSig);
+
+        char pdata[80];
+
+        struct unnamed2
+        {
+           int nVersion;
+           uint256 hashPrevBlock;
+           uint256 hashMerkleRoot;
+           unsigned int nTime;
+           unsigned int nBits;
+           unsigned int nNonce;
+        }
+        block;
+        block.nVersion       = pblock->nVersion;
+        block.hashPrevBlock  = pblock->hashPrevBlock;
+        block.hashMerkleRoot = pblock->hashMerkleRoot;
+        block.nTime          = pblock->nTime;
+        block.nBits          = pblock->nBits;
+        block.nNonce         = pblock->nNonce;
+
+        memcpy(pdata, &block, 80);
+        uint256 hashTarget =  ArithToUint256(arith_uint256().SetCompact(pblock->nBits));
+        UniValue result(UniValue::VOBJ);              
+        result.push_back(Pair("data",     HexStr(BEGIN(pdata), END(pdata))));        
+        result.push_back(Pair("target",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+        return result;
+    }
+    else
+    {
+        // Parse parameters
+        vector<unsigned char> vchData = ParseHex(params[0].get_str());
+        LogPrintf("BankittMiner -- getwork data size=%d \n",vchData.size());
+        if (vchData.size() != 80 && vchData.size() != 128){          
+           throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter" );
+        }
+        CBlock* pdata = (CBlock*)&vchData[0];
+
+        // Byte reverse
+        //for (int i = 0; i < 128/4; i++)
+        //   ((unsigned int*)pdata)[i] = ByteReverse(((unsigned int*)pdata)[i]);
+
+        // Get saved block
+        if (!mapNewBlock.count(pdata->hashMerkleRoot)){
+            LogPrintf("BankittMiner -- getwork hashMerkleRoot not found\n"); 
+            return false;
+        }
+        CBlock* pblock = mapNewBlock[pdata->hashMerkleRoot].first;
+        CScript scriptSig = mapNewBlock[pdata->hashMerkleRoot].second;
+        pblock->nTime = pdata->nTime;
+        pblock->nNonce = pdata->nNonce;
+        //pblock->vtx[0].vin[0].scriptSig = CScript(scriptSig);
+        pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
+        //  pblock->hashMerkleRoot = pblock->BuildMerkleTree();
+        return CheckWork(pblock, coinbaseScript);
+    }
 }

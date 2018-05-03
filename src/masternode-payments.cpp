@@ -284,19 +284,28 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
     CAmount masternodePayment = GetMasternodePayment(nBlockHeight, blockReward);
     
     // split reward between miner ...
-    txNew.vout[0].nValue -= masternodePayment;
+    txNew.vout[0].nValue = blockReward - masternodePayment + GetBlockBonus(nBlockHeight);
     // ... and masternode
     // new reward policy 35 POW / 15 MN / 10 DF start at 150000
-    if(nBlockHeight>SOFT_FORK1_START && masternodePayment>0){
+    if(nBlockHeight>SOFT_FORK1_START){
         // Pay to Devloper Fund address 10 coin
         CAmount developerPayment = masternodePayment*10/25;
         masternodePayment -= developerPayment;
-        CBitcoinAddress devaddress[2];
-        devaddress[0].SetString("BatD7NopcootczqXNzoW9i7psfjSESocXR"); // DEV1 Fix address 
-        devaddress[1].SetString("BjE7tGa9Xko9zqLF9YP9knhaNaq2b3qLhz"); // DEV2 Fix address
-        unsigned int dev_index= nBlockHeight % 2;
-        CTxOut txoutDevRet = CTxOut(developerPayment, GetScriptForDestination(devaddress[dev_index].Get()));
-		LogPrintf("Developer Fund payment of value %u\n", 10);
+        CBitcoinAddress devaddress[4];
+        devaddress[0].SetString("BiKDSvCEShmtcC5g2ETYTnH7mVAUUC89a3"); // DEV1 address nongrain
+        devaddress[1].SetString("BhRMTygeyHew6UDg6Z4FvbEXiKabEfRLdg"); // DEV2 address thehiman
+        devaddress[2].SetString("Bkb5c5vvCrj16xk8sqe8xDs3opJb3aCD3W"); // DEV3 address LuKal 
+        devaddress[3].SetString("BZ4GnTbcDuzwC2cSgA7xBiLyHksKagZWpn"); 
+        unsigned int dev_index= nBlockHeight % 4;
+        // Pay to Devloper startup-fund address 500,000 coin (125,000 x 4 time)
+        if(nBlockHeight >= SOFT_FORK1_DEVFUND_BLOCK+1 && nBlockHeight <= SOFT_FORK1_DEVFUND_BLOCK+4){
+           developerPayment = 125000*COIN;
+        }
+        if(developerPayment>0){
+          CTxOut txoutDevRet = CTxOut(developerPayment, GetScriptForDestination(devaddress[dev_index].Get()));
+          txNew.vout.push_back(txoutDevRet);
+		  LogPrintf("Developer Fund %d payment of value %u\n",dev_index, developerPayment/COIN);
+        }
     }
 
     if(masternodePayment>0){

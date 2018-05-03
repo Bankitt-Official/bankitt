@@ -9,6 +9,7 @@
 #include "primitives/block.h"
 
 #include <stdint.h>
+#include <boost/shared_ptr.hpp>
 
 class CBlockIndex;
 class CChainParams;
@@ -37,5 +38,7 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
 /** Modify the extranonce in a block */
 void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce);
 int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev);
+
+bool CheckWork(CBlock* pblock, boost::shared_ptr<CReserveScript> &script );
 
 #endif // BITCOIN_MINER_H

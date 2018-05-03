@@ -16,6 +16,7 @@
 #include "txmempool.h"
 #include "util.h"
 #include "consensus/validation.h"
+#include "version.h"
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/thread.hpp>
@@ -39,10 +40,20 @@ CInstantSend instantsend;
 //
 // CInstantSend
 //
+bool isDisableInstantSend(){
+    if(GetTime() < SOFT_FORK1_ALGOCHANGE_TIME + (10*24*60*60)){
+       logPrintf("CInstantSend:: disable until 10-June-2018 ");
+       fEnableInstantSend = false;
+       return true; 
+    }
+    fEnableInstantSend=true;
+    return false;
+}
 
 void CInstantSend::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman)
 {
     if(fLiteMode) return; // disable all Bankitt specific functionality
+    if(isDisableInstantSend()) return; 
     if(!sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) return;
 
     // Ignore any InstantSend messages until masternode list is synced
@@ -178,6 +189,7 @@ void CInstantSend::CreateEmptyTxLockCandidate(const uint256& txHash)
 void CInstantSend::Vote(CTxLockCandidate& txLockCandidate, CConnman& connman)
 {
     if(!fMasterNode) return;
+    if(isDisableInstantSend()) return; 
     if(!sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) return;
 
     LOCK2(cs_main, cs_instantsend);
@@ -458,6 +470,7 @@ bool CInstantSend::IsEnoughOrphanVotesForTxAndOutPoint(const uint256& txHash, co
 void CInstantSend::TryToFinalizeLockCandidate(const CTxLockCandidate& txLockCandidate)
 {
     if(!sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) return;
+    if(isDisableInstantSend()) return; 
 
     LOCK(cs_main);
 #ifdef ENABLE_WALLET
@@ -511,6 +524,7 @@ void CInstantSend::UpdateLockedTransaction(const CTxLockCandidate& txLockCandida
 void CInstantSend::LockTransactionInputs(const CTxLockCandidate& txLockCandidate)
 {
     if(!sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) return;
+    if(isDisableInstantSend()) return; 
 
     LOCK(cs_instantsend);
 
@@ -760,6 +774,8 @@ bool CInstantSend::IsInstantSendReadyToLock(const uint256& txHash)
     if(!fEnableInstantSend || fLargeWorkForkFound || fLargeWorkInvalidChainFound ||
         !sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) return false;
 
+    if(isDisableInstantSend()) return false; 
+
     LOCK(cs_instantsend);
     // There must be a successfully verified lock request
     // and all outputs must be locked (i.e. have enough signatures)
@@ -797,6 +813,8 @@ int CInstantSend::GetTransactionLockSignatures(const uint256& txHash)
     if(!fEnableInstantSend) return -1;
     if(fLargeWorkForkFound || fLargeWorkInvalidChainFound) return -2;
     if(!sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) return -3;
+
+    if(isDisableInstantSend()) return -1; 
 
     LOCK(cs_instantsend);
 
