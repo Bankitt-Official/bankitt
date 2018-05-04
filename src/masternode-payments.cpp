@@ -291,12 +291,11 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
         // Pay to Devloper Fund address 10 coin
         CAmount developerPayment = masternodePayment*10/25;
         masternodePayment -= developerPayment;
-        CBitcoinAddress devaddress[4];
+        CBitcoinAddress devaddress[3];
         devaddress[0].SetString("BiKDSvCEShmtcC5g2ETYTnH7mVAUUC89a3"); // DEV1 address nongrain
         devaddress[1].SetString("BhRMTygeyHew6UDg6Z4FvbEXiKabEfRLdg"); // DEV2 address thehiman
         devaddress[2].SetString("Bkb5c5vvCrj16xk8sqe8xDs3opJb3aCD3W"); // DEV3 address LuKal 
-        devaddress[3].SetString("BZ4GnTbcDuzwC2cSgA7xBiLyHksKagZWpn"); 
-        unsigned int dev_index= nBlockHeight % 4;
+        unsigned int dev_index= nBlockHeight % 3;
         // Pay to Devloper startup-fund address 500,000 coin (125,000 x 4 time)
         if(nBlockHeight >= SOFT_FORK1_DEVFUND_BLOCK+1 && nBlockHeight <= SOFT_FORK1_DEVFUND_BLOCK+4){
            developerPayment = 125000*COIN;
