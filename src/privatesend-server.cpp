@@ -12,13 +12,22 @@
 #include "txmempool.h"
 #include "util.h"
 #include "utilmoneystr.h"
+#include "version.h"
 
 CPrivateSendServer privateSendServer;
+
+bool isDisablePrivateSend(){
+    if(GetTime() < SOFT_FORK1_ALGOCHANGE_TIME + (10*24*60*60)){
+       return true; 
+    }
+    return false;
+}
 
 void CPrivateSendServer::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv, CConnman& connman)
 {
     if(!fMasterNode) return;
     if(fLiteMode) return; // ignore all Bankitt related functionality
+    if(isDisablePrivateSend()) return;
     if(!masternodeSync.IsBlockchainSynced()) return;
 
     if(strCommand == NetMsgType::DSACCEPT) {
@@ -331,6 +340,7 @@ void CPrivateSendServer::CreateFinalTransaction(CConnman& connman)
 void CPrivateSendServer::CommitFinalTransaction(CConnman& connman)
 {
     if(!fMasterNode) return; // check and relay final tx only on masternode
+    if(isDisablePrivateSend()) return;
 
     CTransaction finalTransaction = CTransaction(finalMutableTransaction);
     uint256 hashTx = finalTransaction.GetHash();

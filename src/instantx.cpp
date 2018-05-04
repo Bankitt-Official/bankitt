@@ -42,7 +42,6 @@ CInstantSend instantsend;
 //
 bool isDisableInstantSend(){
     if(GetTime() < SOFT_FORK1_ALGOCHANGE_TIME + (10*24*60*60)){
-       logPrintf("CInstantSend:: disable until 10-June-2018 ");
        fEnableInstantSend = false;
        return true; 
     }
