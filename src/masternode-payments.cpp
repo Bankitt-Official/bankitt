@@ -297,8 +297,8 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
         devaddress[2].SetString("Bkb5c5vvCrj16xk8sqe8xDs3opJb3aCD3W"); // DEV3 address LuKal 
         unsigned int dev_index= nBlockHeight % 3;
         // Pay to Devloper startup-fund address 500,000 coin (125,000 x 4 time)
-        if(nBlockHeight >= SOFT_FORK1_DEVFUND_BLOCK+1 && nBlockHeight <= SOFT_FORK1_DEVFUND_BLOCK+4){
-           developerPayment = 125000*COIN;
+        if(nBlockHeight >= SOFT_FORK1_DEVFUND_BLOCK+1 && nBlockHeight <= SOFT_FORK1_DEVFUND_BLOCK+3){
+           developerPayment = 167000*COIN;
         }
         if(developerPayment>0){
           CTxOut txoutDevRet = CTxOut(developerPayment, GetScriptForDestination(devaddress[dev_index].Get()));
