@@ -9,7 +9,7 @@
 /**
  * SOFT_FORK1 versioning
  */
-static const int SOFT_FORK1_START                = 140000;
+static const int SOFT_FORK1_START                = 160000;
 static const int SOFT_FORK1_DEVFUND_BLOCK        = SOFT_FORK1_START + 100;
 static const int SOFT_FORK1_PROTOCOL_VERSION     = 90003;
 static const int SOFT_FORK1_MIN_PROTOCOL_VERSION = 90003; //
