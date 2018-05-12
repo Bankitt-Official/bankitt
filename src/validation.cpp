@@ -2490,10 +2490,7 @@ void PruneAndFlush() {
 void static UpdateTip(CBlockIndex *pindexNew) {
     const CChainParams& chainParams = Params();
     chainActive.SetTip(pindexNew);
-
-    if(chainActive.Height()>SOFT_FORK1_START){
-        MIN_PEER_PROTO_VERSION  = SOFT_FORK1_MIN_PROTOCOL_VERSION;
-    }  
+     
     // New best block
     mempool.AddTransactionsUpdated(1);
     

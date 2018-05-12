@@ -2526,6 +2526,11 @@ void CConnman::RelayTransaction(const CTransaction& tx, const CDataStream& ss)
 }
 
 void CConnman::RelayInv(CInv &inv, const int minProtoVersion) {
+    int minVer = minProtoVersion;
+    uint64_t now = GetTime();
+    if(now>SOFT_FORK1_ALGOCHANGE_TIME){
+      minVer =   
+    }  
     LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes)
         if(pnode->nVersion >= minProtoVersion)
