@@ -13,7 +13,7 @@
  * for both bankittd and bankitt-qt, to make it harder for attackers to
  * target servers or GUI users specifically.
  */
-const std::string CLIENT_NAME("Bankitt Core");
+const std::string CLIENT_NAME("Bankitt Community");
 
 /**
  * Client version number
@@ -45,8 +45,8 @@ const std::string CLIENT_NAME("Bankitt Core");
 //! git will put "#define GIT_ARCHIVE 1" on the next line inside archives. 
 #define GIT_ARCHIVE 1
 #ifdef GIT_ARCHIVE
-#define GIT_COMMIT_ID "9fa6c15"
-#define GIT_COMMIT_DATE "Dec 29, 2017"
+#define GIT_COMMIT_ID "8ea4e93"
+#define GIT_COMMIT_DATE "May 1, 2018"
 #endif
 
 #define BUILD_DESC_WITH_SUFFIX(maj, min, rev, build, suffix) \

@@ -217,7 +217,6 @@ void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blo
             CSuperblockManager::CreateSuperblock(txNew, nBlockHeight, voutSuperblockRet);
             return;
     }
-
     // FILL BLOCK PAYEE WITH MASTERNODE PAYMENT OTHERWISE
     mnpayments.FillBlockPayee(txNew, nBlockHeight, blockReward, txoutMasternodeRet);
     LogPrint("mnpayments", "FillBlockPayments -- nBlockHeight %d blockReward %lld txoutMasternodeRet %s txNew %s",
@@ -283,18 +282,35 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
 
     // GET MASTERNODE PAYMENT VARIABLES SETUP
     CAmount masternodePayment = GetMasternodePayment(nBlockHeight, blockReward);
-
+    
     // split reward between miner ...
-    txNew.vout[0].nValue -= masternodePayment;
+    txNew.vout[0].nValue = blockReward - masternodePayment + GetBlockBonus(nBlockHeight);
     // ... and masternode
-    txoutMasternodeRet = CTxOut(masternodePayment, payee);
-    txNew.vout.push_back(txoutMasternodeRet);
+    // new reward policy 35 POW / 15 MN / 10 DF start at 150000
+    if(nBlockHeight>SOFT_FORK1_START){
+        // Pay to Devloper Fund address 10 coin
+        CAmount developerPayment = masternodePayment*10/25;
+        masternodePayment -= developerPayment;
+        CBitcoinAddress devaddress[3];
+        devaddress[0].SetString("BiKDSvCEShmtcC5g2ETYTnH7mVAUUC89a3"); // DEV1 address nongrain
+        devaddress[1].SetString("BhRMTygeyHew6UDg6Z4FvbEXiKabEfRLdg"); // DEV2 address thehiman
+        devaddress[2].SetString("Bkb5c5vvCrj16xk8sqe8xDs3opJb3aCD3W"); // DEV3 address LuKal 
+        unsigned int dev_index= nBlockHeight % 3;
+        if(developerPayment>0){
+          CTxOut txoutDevRet = CTxOut(developerPayment, GetScriptForDestination(devaddress[dev_index].Get()));
+          txNew.vout.push_back(txoutDevRet);
+		  LogPrintf("Developer Fund %d payment of value %u\n",dev_index, developerPayment/COIN);
+        }
+    }
 
-    CTxDestination address1;
-    ExtractDestination(payee, address1);
-    CBitcoinAddress address2(address1);
-
-    LogPrintf("CMasternodePayments::FillBlockPayee -- Masternode payment %lld to %s\n", masternodePayment, address2.ToString());
+    if(masternodePayment>0){
+      txoutMasternodeRet = CTxOut(masternodePayment, payee);
+      txNew.vout.push_back(txoutMasternodeRet);
+      CTxDestination address1;
+      ExtractDestination(payee, address1);
+      CBitcoinAddress address2(address1);
+      LogPrintf("CMasternodePayments::FillBlockPayee -- Masternode payment %lld to %s\n", masternodePayment, address2.ToString());
+    }
 }
 
 int CMasternodePayments::GetMinMasternodePaymentsProto() {

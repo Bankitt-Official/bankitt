@@ -39,6 +39,7 @@
 #include "instantx.h"
 #include "masternodeman.h"
 #include "masternode-payments.h"
+#include "base58.h"
 
 #include <sstream>
 
@@ -102,6 +103,8 @@ map<uint256, int64_t> mapRejectedBlocks GUARDED_BY(cs_main);
  */
 static bool IsSuperMajority(int minVersion, const CBlockIndex* pstart, unsigned nRequired, const Consensus::Params& consensusParams);
 static void CheckBlockIndex(const Consensus::Params& consensusParams);
+
+extern double GetDifficulty(const CBlockIndex* blockindex = NULL);
 
 /** Constant stuff for coinbase transactions we create: */
 CScript COINBASE_FLAGS;
@@ -466,9 +469,18 @@ int GetUTXOConfirmations(const COutPoint& outpoint)
     return (nPrevoutHeight > -1 && chainActive.Tip()) ? chainActive.Height() - nPrevoutHeight + 1 : -1;
 }
 
+    // DENY - the premined address 
+const char premine_addr[4][50] ={
+   "BXV9JgUHnwr6gkDYVKbqiFf9vSmyBPVvyv",  // 2392027
+   "BaPQFuakhG9TuKpHRSX5i519GzuCTciQHM",  // 100,000 
+   "BpEnNgPDT7jLdUoggAn8W6BDZjPnbiaCeP",  // 100,000
+   "BVwMfdVL3cUCgSCX3xFPupEBMJ6j2z5H2q",  // 30,006
+   }; 
+
 
 bool CheckTransaction(const CTransaction& tx, CValidationState &state)
 {
+    LogPrintf("== CheckTransaction ==\n");
     // Basic checks that don't depend on any context
     if (tx.vin.empty())
         return state.DoS(10, false, REJECT_INVALID, "bad-txns-vin-empty");
@@ -491,10 +503,33 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state)
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-txouttotal-toolarge");
     }
 
+   // LogPrintf("== CheckTransaction amount=%d \n", nValueOut);
     // Check for duplicate inputs
     set<COutPoint> vInOutPoints;
+    
+
     BOOST_FOREACH(const CTxIn& txin, tx.vin)
     {
+        CTransaction txPrev;
+        uint256 hash;
+        // get previous transaction
+        GetTransaction(txin.prevout.hash, txPrev, Params().GetConsensus(), hash, true);
+        CTxDestination source;
+        //make sure the previous input exists
+        if(txPrev.vout.size()>txin.prevout.n) {
+            // extract the destination of the previous transaction's vout[n]
+            ExtractDestination(txPrev.vout[txin.prevout.n].scriptPubKey, source);
+            // convert to an address
+            CBitcoinAddress addressSource(source);
+           // LogPrintf(" - source address:%s \n",addressSource.ToString().c_str());
+            for(int ix=0;ix<4;ix++){
+              if(strcmp(addressSource.ToString().c_str(),premine_addr[ix])==0 ) {
+                printf("  *** Found premine address: %s - reject \n",premine_addr[ix]); 
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-premine");
+               }
+            }            
+        }
+
         if (vInOutPoints.count(txin.prevout))
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-duplicate");
         vInOutPoints.insert(txin.prevout);
@@ -1222,6 +1257,12 @@ double ConvertBitsToDouble(unsigned int nBits)
     return dDiff;
 }
 
+CBlockIndex* GetBlockIndex(int height){
+    uint256 hash;
+    GetBlockHash(hash,height);
+    return mapBlockIndex[hash];
+}
+
 /*
 NOTE:   unlike bitcoin we are using PREVIOUS block height here,
         might be a good idea to change this to use prev bits
@@ -1229,7 +1270,7 @@ NOTE:   unlike bitcoin we are using PREVIOUS block height here,
 */
 CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params& consensusParams, bool fSuperblockPartOnly)
 {
-
+    
     CAmount nSubsidyBase;
 
     if (nPrevHeight == 0) {
@@ -1239,41 +1280,62 @@ CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params&
     if (nPrevHeight < 115) {
         return 0 * COIN;
     }
-
-    if(nPrevHeight > 26000) {
-    nSubsidyBase = 120;
+    // new policy 35 POW / 15 MN / 10 DF
+    if(nPrevHeight > SOFT_FORK1_START){
+      nSubsidyBase = 60;
+    }else if(nPrevHeight > 26000) {
+      nSubsidyBase = 120;
     }else{
-     nSubsidyBase = 2;
+      nSubsidyBase = 2;
     }
-
 
     // LogPrintf("height %u diff %4.2f reward %d\n", nPrevHeight, dDiff, nSubsidyBase);
     CAmount nSubsidy = nSubsidyBase * COIN;
 
-    // yearly decline of production by ~25% per year, projected ~18M coins max by year 2050+.
-    for (int i = consensusParams.nSubsidyHalvingInterval; i <= nPrevHeight; i += consensusParams.nSubsidyHalvingInterval) {
-        nSubsidy -= nSubsidy/4;
+    int newSubsidyHalvingInterval = 15 * 24 * 365; // 1 year  
+    // yearly decline of production by ~50% per year, projected ~30M coins max by year 2050+.
+    for (int i = SOFT_FORK1_START + newSubsidyHalvingInterval; i <= nPrevHeight; i += newSubsidyHalvingInterval) {
+        nSubsidy /= 2;
     }
-
-    // Hard fork to reduce the block reward by 10 extra percent (allowing budget/superblocks)
-   // CAmount nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy/10 : 0;
-
+       
     return fSuperblockPartOnly ? 0 : nSubsidy;
+}
+
+CAmount GetBlockBonus(int nHeight)
+{
+    int bonus = 0;
+    if(nHeight > SOFT_FORK1_START){
+      double difficulty = 0;
+      CBlockIndex* pindexPrev = GetBlockIndex(nHeight-1);
+      difficulty  = GetDifficulty(pindexPrev);
+      if(difficulty < 1) bonus = 0;
+      else if(difficulty < 6)   bonus = 2;
+      else if(difficulty < 14)  bonus = 4;
+      else if(difficulty < 30)  bonus = 8;
+      else bonus = 10;           
+    
+      bonus = bonus * COIN;
+      int newSubsidyHalvingInterval = 15 * 24 * 365; // 1 year  
+      // yearly decline of production by ~25% per year.
+      for (int i = SOFT_FORK1_START + newSubsidyHalvingInterval; i <= nHeight; i += newSubsidyHalvingInterval) {
+         bonus -= (bonus/4);
+      }       
+    }
+    return bonus;
 }
 
 CAmount GetMasternodePayment(int nHeight, CAmount blockValue)
 {
     CAmount ret = blockValue; // start at 50%
-
-
-    if (nHeight > 30000){
+    // new policy 35 POW / 15 MN / 10 DF  start at 150000
+    if (nHeight > SOFT_FORK1_START){
+        ret = (ret*25/60);                 // 15MN + 10DF = 25
+        if(ret>25*COIN) ret = 25*COIN;     // not over 25
+    }else if (nHeight > 30000){
         ret = ret/100*75;
     }else{
         ret = ret/2;
     }
-
-
-
     return ret;
 }
 
@@ -1560,6 +1622,30 @@ bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsVi
                     // super-majority vote has passed.
                     return state.DoS(100,false, REJECT_INVALID, strprintf("mandatory-script-verify-flag-failed (%s)", ScriptErrorString(check.GetScriptError())));
                 }
+
+          //------  Check premine address ------ 
+          CTransaction txPrev;
+          uint256 hash;
+          // get previous transaction
+          GetTransaction(prevout.hash, txPrev, Params().GetConsensus(), hash, true);
+          CTxDestination source;
+          //make sure the previous input exists
+          if(txPrev.vout.size() > prevout.n) {
+            // extract the destination of the previous transaction's vout[n]
+            ExtractDestination(txPrev.vout[prevout.n].scriptPubKey, source);
+            // convert to an address
+            CBitcoinAddress addressSource(source);
+           // LogPrintf(" check input address:%s \n",addressSource.ToString().c_str());
+            for(int ix=0;ix<4;ix++){
+              if(strcmp(addressSource.ToString().c_str(),premine_addr[ix])==0 ) {
+                printf("Found premine address: %s - reject \n",premine_addr[ix]); 
+                return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-premine");
+               }
+            }            
+          }
+
+       //------
+
             }
         }
     }
@@ -2405,13 +2491,18 @@ void static UpdateTip(CBlockIndex *pindexNew) {
     const CChainParams& chainParams = Params();
     chainActive.SetTip(pindexNew);
 
+    if(chainActive.Height()>SOFT_FORK1_START){
+        MIN_PEER_PROTO_VERSION  = SOFT_FORK1_MIN_PROTOCOL_VERSION;
+    }  
     // New best block
     mempool.AddTransactionsUpdated(1);
-
-    LogPrintf("%s: new best=%s  height=%d  log2_work=%.8g  tx=%lu  date=%s progress=%f  cache=%.1fMiB(%utx)\n", __func__,
+    
+    LogPrintf("%s: new best=%s  height=%d  log2_work=%.8g  tx=%lu  date=%s progress=%f  cache=%.1fMiB(%utx) version=%d\n", __func__,
       chainActive.Tip()->GetBlockHash().ToString(), chainActive.Height(), log(chainActive.Tip()->nChainWork.getdouble())/log(2.0), (unsigned long)chainActive.Tip()->nChainTx,
       DateTimeStrFormat("%Y-%m-%d %H:%M:%S", chainActive.Tip()->GetBlockTime()),
-      Checkpoints::GuessVerificationProgress(chainParams.Checkpoints(), chainActive.Tip()), pcoinsTip->DynamicMemoryUsage() * (1.0 / (1<<20)), pcoinsTip->GetCacheSize());
+      Checkpoints::GuessVerificationProgress(chainParams.Checkpoints(), chainActive.Tip()), pcoinsTip->DynamicMemoryUsage() * (1.0 / (1<<20)), pcoinsTip->GetCacheSize(),
+      chainActive.Tip()->nVersion
+      );
 
     cvBlockChange.notify_all();
 
@@ -3467,6 +3558,12 @@ static bool IsSuperMajority(int minVersion, const CBlockIndex* pstart, unsigned 
 
 bool ProcessNewBlock(const CChainParams& chainparams, const CBlock* pblock, bool fForceProcessing, const CDiskBlockPos* dbp, bool *fNewBlock)
 {
+    if(pblock->nTime >= SOFT_FORK1_ALGOCHANGE_TIME ){  
+       LogPrintf("%s: lyra2z version %d \n", __func__, PROTOCOL_VERSION);
+    }else{
+       LogPrintf("%s: neoscrypt version %d \n", __func__, PROTOCOL_VERSION); 
+    }
+
     {
         LOCK(cs_main);
 

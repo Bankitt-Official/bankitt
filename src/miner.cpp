@@ -30,6 +30,8 @@
 
 #include <boost/thread.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/assign/list_of.hpp>
+#include <boost/shared_ptr.hpp>
 #include <queue>
 
 using namespace std;
@@ -297,7 +299,12 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
 
         nLastBlockTx = nBlockTx;
         nLastBlockSize = nBlockSize;
-        LogPrintf("CreateNewBlock(): total size %u txs: %u fees: %ld sigops %d\n", nBlockSize, nBlockTx, nFees, nBlockSigOps);
+     
+        string algo="neoscrypt";
+        if(pblock->nTime >= SOFT_FORK1_ALGOCHANGE_TIME ){  
+           algo = "lyra2z";
+        }
+        LogPrintf("CreateNewBlock(): Height %u total size %u txs: %u fees: %ld sigops %d algo:%s \n",nHeight,nBlockSize, nBlockTx, nFees, nBlockSigOps,algo);
 
         // Update block coinbase
         pblock->vtx[0] = txNew;
@@ -396,6 +403,26 @@ static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainpar
     if (!ProcessNewBlock(chainparams, pblock, true, NULL, NULL))
         return error("ProcessBlockFound -- ProcessNewBlock() failed, block not accepted");
 
+    return true;
+}
+
+bool CheckWork(CBlock* pblock, boost::shared_ptr<CReserveScript> &script )
+{
+    uint256 hash = pblock->GetHash();
+    arith_uint256 hashTarget = arith_uint256().SetCompact(pblock->nBits);
+
+    if (UintToArith256(hash) > hashTarget){
+        LogPrintf("BankittMiner:\n  CheckWork false\n  hash: %s\n  target: %s\n", hash.GetHex(), hashTarget.GetHex());
+        return false;
+    }
+    // Found a solution
+    {
+      SetThreadPriority(THREAD_PRIORITY_NORMAL);
+      LogPrintf("BankittMiner:\n  proof-of-work found\n  hash: %s\n  target: %s\n", hash.GetHex(), hashTarget.GetHex());
+      ProcessBlockFound(pblock, Params());
+      SetThreadPriority(THREAD_PRIORITY_LOWEST);
+      script->KeepScript();
+    }
     return true;
 }
 

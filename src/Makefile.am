@@ -316,7 +316,23 @@ crypto_libbitcoin_crypto_a_SOURCES = \
   crypto/sha512.cpp \
   crypto/sha512.h
 
-# x11
+crypto_libbitcoin_crypto_a_SOURCES = \
+  crypto/common.h \
+  crypto/hmac_sha256.cpp \
+  crypto/hmac_sha256.h \
+  crypto/hmac_sha512.cpp \
+  crypto/hmac_sha512.h \
+  crypto/ripemd160.cpp \
+  crypto/aes_helper.c \
+  crypto/ripemd160.h \
+  crypto/sha1.cpp \
+  crypto/sha1.h \
+  crypto/sha256.cpp \
+  crypto/sha256.h \
+  crypto/sha512.cpp \
+  crypto/sha512.h
+
+# neoscrypt + lyra2z
 crypto_libbitcoin_crypto_a_SOURCES += \
   crypto/blake.c \
   crypto/bmw.c \
@@ -342,7 +358,13 @@ crypto_libbitcoin_crypto_a_SOURCES += \
   crypto/sph_simd.h \
   crypto/sph_skein.h \
 	crypto/neoscrypt.h \
-  crypto/sph_types.h
+  crypto/sph_types.h \
+  crypto/lyra2z/lyra2.c \
+  crypto/lyra2z/lyra2.h \
+  crypto/lyra2z/lyra2z.c \
+  crypto/lyra2z/lyra2z.h \
+  crypto/lyra2z/sponge.c \
+  crypto/lyra2z/sponge.h
 
 # common: shared between bankittd, and bankitt-qt and non-server tools
 libbitcoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)

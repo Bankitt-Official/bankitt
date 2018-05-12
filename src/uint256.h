@@ -93,6 +93,20 @@ public:
     {
         s.read((char*)data, sizeof(data));
     }
+
+    uint64_t GetUint64(int pos) const
+    {
+        const uint8_t* ptr = data + pos * 8;
+        return ((uint64_t)ptr[0]) | \
+               ((uint64_t)ptr[1]) << 8 | \
+               ((uint64_t)ptr[2]) << 16 | \
+               ((uint64_t)ptr[3]) << 24 | \
+               ((uint64_t)ptr[4]) << 32 | \
+               ((uint64_t)ptr[5]) << 40 | \
+               ((uint64_t)ptr[6]) << 48 | \
+               ((uint64_t)ptr[7]) << 56;
+    }
+
 };
 
 /** 160-bit opaque blob.
@@ -131,6 +145,14 @@ public:
      * @note This hash is not stable between little and big endian.
      */
     uint64_t GetHash(const uint256& salt) const;
+
+    int GetNibble(int index) const 
+    {
+        index = 63 - index;
+        if (index % 2 == 1)
+            return(data[index / 2] >> 4);
+        return(data[index / 2] & 0x0F); 
+    }
 };
 
 /* uint256 from const char *.

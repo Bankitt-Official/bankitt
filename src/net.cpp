@@ -1447,7 +1447,7 @@ void ThreadMapPort()
             }
         }
 
-        std::string strDesc = "Bankitt Core " + FormatFullVersion();
+        std::string strDesc = "Bankitt Community " + FormatFullVersion();
 
         try {
             while (true) {

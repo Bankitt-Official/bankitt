@@ -122,6 +122,8 @@ private Q_SLOTS:
     void buttonSelectAllClicked();
     void buttonToggleLockClicked();
     void updateLabelLocked();
+    void buttonMasterLockClicked();
+ 
 };
 
 #endif // BITCOIN_QT_COINCONTROLDIALOG_H

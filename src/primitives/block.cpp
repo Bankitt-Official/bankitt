@@ -4,19 +4,27 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "primitives/block.h"
+#include "version.h"
 
 #include "hash.h"
 #include "tinyformat.h"
 #include "utilstrencodings.h"
 #include "crypto/common.h"
 #include "crypto/neoscrypt.h"
+#include "crypto/lyra2z/lyra2z.h"
 
 uint256 CBlockHeader::GetHash() const
-{
-    //return HashX11(BEGIN(nVersion), END(nNonce));
+{      
     uint256 thash;
     unsigned int profile = 0x0;
-    neoscrypt((unsigned char *) &nVersion, (unsigned char *) &thash, profile);
+    if(nTime >= SOFT_FORK1_ALGOCHANGE_TIME - (24*60*60*3)){ 
+      PROTOCOL_VERSION = SOFT_FORK1_PROTOCOL_VERSION;
+    }
+    if(nTime >= SOFT_FORK1_ALGOCHANGE_TIME){  
+      lyra2z_hash(BEGIN(nVersion), BEGIN(thash));
+    }else{
+      neoscrypt((unsigned char *) &nVersion, (unsigned char *) &thash, profile);
+    }
     return thash;
 }
 
