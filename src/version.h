@@ -9,9 +9,9 @@
 /**
  * SOFT_FORK1 versioning
  */
-static const int SOFT_FORK1_START                = 160000;
+static const int SOFT_FORK1_START                = 360000;
 static const int SOFT_FORK1_DEVFUND_BLOCK        = SOFT_FORK1_START + 100;
-static const int SOFT_FORK1_ALGOCHANGE_TIME      = 1527811200;  // ; 1527811200 =  01 June,2018 00:00:00
+static const int SOFT_FORK1_ALGOCHANGE_TIME      = 1627811200;  // ; 1527811200 =  01 June,2018 00:00:00
 /**
  * network protocol versioning
  */
